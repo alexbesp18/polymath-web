@@ -48,6 +48,8 @@ pm-next = "pm.commands.next_cmd:next_cmd"
 pm-pair = "pm.commands.pair:pair"
 pm-log = "pm.commands.log:log"
 pm-gaps = "pm.commands.gaps:gaps"
+pm-distance = "pm.commands.distance:distance"
+pm-connections = "pm.commands.connections:connections"
 
 [tool.setuptools.packages.find]
 where = ["."]

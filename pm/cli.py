@@ -48,6 +48,8 @@ from pm.commands.next_cmd import next_cmd
 from pm.commands.pair import pair
 from pm.commands.log import log
 from pm.commands.gaps import gaps
+from pm.commands.distance import distance
+from pm.commands.connections import connections
 
 cli.add_command(init)
 cli.add_command(status)
@@ -55,6 +57,8 @@ cli.add_command(next_cmd, name="next")
 cli.add_command(pair)
 cli.add_command(log)
 cli.add_command(gaps)
+cli.add_command(distance)
+cli.add_command(connections)
 
 
 if __name__ == "__main__":
