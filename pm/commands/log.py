@@ -101,7 +101,7 @@ def log(
 
     # Auto-detect slot if not specified
     if slot is None:
-        slot = domain_obj.next_slot().value
+        slot = domain_obj.next_slot()  # next_slot() returns string directly
         console.print(f"[dim]Auto-detected slot: {slot}[/dim]")
 
     # Create daily log

@@ -33,7 +33,7 @@ from pm.data.templates import (
 class VaultStats:
     """Statistics about the vault state."""
 
-    total_domains: int = 170
+    total_domains: int = 180
     domains_touched: int = 0
     domains_surveying: int = 0
     domains_surveyed: int = 0
@@ -133,12 +133,13 @@ class Vault:
 
     def branch_dir(self, branch_id: str) -> Path:
         """Get directory for a branch."""
-        branch_id = branch_id.zfill(2)
+        branch_id_str = str(branch_id).zfill(2)
+        branch_id_int = int(branch_id)
         for b in BRANCHES:
-            if b["branch_id"] == branch_id:
-                folder_name = f"{branch_id}-{b['branch_name'].replace(' ', '-')}"
+            if b["branch_id"] == branch_id_int:
+                folder_name = f"{branch_id_str}-{b['branch_name'].replace(' ', '-')}"
                 return self.domains_dir / folder_name
-        return self.domains_dir / f"{branch_id}-Unknown"
+        return self.domains_dir / f"{branch_id_str}-Unknown"
 
     def domain_filepath(self, domain_id: str) -> Path:
         """Get filepath for a domain profile."""
@@ -177,8 +178,8 @@ class Vault:
 
         # Create branch directories
         for branch in BRANCHES:
-            branch_id = branch["branch_id"]
-            folder_name = f"{branch_id}-{branch['branch_name'].replace(' ', '-')}"
+            branch_id_str = str(branch["branch_id"]).zfill(2)
+            folder_name = f"{branch_id_str}-{branch['branch_name'].replace(' ', '-')}"
             (self.domains_dir / folder_name).mkdir(parents=True, exist_ok=True)
 
     # === Domain operations ===
@@ -474,7 +475,7 @@ class Vault:
     # === Initialization helpers ===
 
     def create_domain_files(self) -> int:
-        """Create all 170 domain profile files.
+        """Create all 180 domain profile files.
 
         Returns:
             Number of files created.
@@ -524,8 +525,9 @@ class Vault:
 
         for branch in BRANCHES:
             branch_id = branch["branch_id"]
+            branch_id_str = str(branch_id).zfill(2)
             branch_name = branch["branch_name"]
-            branch_folder = f"{branch_id}-{branch_name.replace(' ', '-')}"
+            branch_folder = f"{branch_id_str}-{branch_name.replace(' ', '-')}"
             branch_dir = self.domains_dir / branch_folder
             filepath = branch_dir / "_Branch-Overview.md"
 
@@ -538,7 +540,7 @@ class Vault:
             )
 
             content = BRANCH_OVERVIEW_TEMPLATE.format(
-                branch_id=branch_id,
+                branch_id=branch_id_str,
                 branch_name=branch_name,
                 branch_folder=branch_folder,
                 domain_count=domain_count,
