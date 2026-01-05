@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pm --help:*)",
+      "Bash(pm-init:*)",
+      "Bash(pm-status:*)",
+      "Bash(pm-next:*)",
+      "Bash(pm-pair:*)",
+      "Bash(pm-log:*)",
+      "Bash(pm-gaps:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
