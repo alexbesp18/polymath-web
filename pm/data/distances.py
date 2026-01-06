@@ -163,9 +163,9 @@ def get_branch_distance(branch_a: str, branch_b: str) -> int:
     Returns:
         Distance 0-4 between the branches.
     """
-    # Normalize branch IDs to 2-digit strings
-    a = branch_a.zfill(2)
-    b = branch_b.zfill(2)
+    # Normalize branch IDs to 2-digit strings (handle both int and str inputs)
+    a = str(branch_a).zfill(2)
+    b = str(branch_b).zfill(2)
 
     # Try direct lookup
     if (a, b) in _BRANCH_DISTANCES_RAW:

@@ -1,6 +1,7 @@
 """Vault management for Polymath Engine.
 
 Handles all interactions with the Obsidian vault filesystem.
+Optionally uses Supabase as the primary data store.
 """
 
 from dataclasses import dataclass
@@ -19,6 +20,7 @@ from pm.core.errors import (
     InvalidFrontmatterError,
     VaultNotFoundError,
 )
+from pm.core.supabase_client import get_supabase_client, SupabaseClient
 from pm.data.domains import BRANCHES, DOMAINS, get_domain_by_id
 from pm.data.templates import (
     BOOK_NOTE_TEMPLATE,
@@ -46,27 +48,47 @@ class VaultStats:
 
 
 class Vault:
-    """Manages the Obsidian vault for Polymath Engine."""
+    """Manages the Obsidian vault for Polymath Engine.
 
-    def __init__(self, vault_path: Path):
+    Can operate in two modes:
+    - File-based: Uses Obsidian vault markdown files (original behavior)
+    - Supabase: Uses Supabase database (when configured)
+    """
+
+    def __init__(self, vault_path: Path, use_supabase: bool = True):
         """Initialize vault manager.
 
         Args:
             vault_path: Path to the Obsidian vault root.
+            use_supabase: If True, try to use Supabase; falls back to files if unavailable.
         """
         self.vault_path = Path(vault_path).expanduser()
+        self._use_supabase = use_supabase
+        self._supabase: Optional[SupabaseClient] = None
+
+        if use_supabase:
+            self._supabase = get_supabase_client()
+            if not self._supabase.is_available:
+                self._use_supabase = False
+                self._supabase = None
+
+    @property
+    def using_supabase(self) -> bool:
+        """Check if Supabase is being used."""
+        return self._use_supabase and self._supabase is not None
 
     @classmethod
-    def from_config(cls, config: Config) -> "Vault":
+    def from_config(cls, config: Config, use_supabase: bool = True) -> "Vault":
         """Create Vault from config.
 
         Args:
             config: Configuration with vault_path.
+            use_supabase: If True, try to use Supabase backend.
 
         Returns:
             Vault instance.
         """
-        return cls(config.vault_path)
+        return cls(config.vault_path, use_supabase=use_supabase)
 
     def exists(self) -> bool:
         """Check if vault exists."""
@@ -185,7 +207,7 @@ class Vault:
     # === Domain operations ===
 
     def load_domain(self, domain_id: str) -> Domain:
-        """Load a domain from its profile file.
+        """Load a domain from its profile file or Supabase.
 
         Args:
             domain_id: Domain ID (e.g., "02.04")
@@ -194,20 +216,55 @@ class Vault:
             Domain object.
 
         Raises:
-            DomainNotFoundError: If domain file doesn't exist.
+            DomainNotFoundError: If domain doesn't exist.
         """
+        # Try Supabase first
+        if self.using_supabase:
+            data = self._supabase.get_domain(domain_id)
+            if data:
+                return Domain(
+                    domain_id=data["domain_id"],
+                    domain_name=data["name"],
+                    branch_id=int(data["branch_id"]),
+                    branch_name=self._get_branch_name(data["branch_id"]),
+                    description=data.get("description", ""),
+                    is_hub=data.get("is_hub", False),
+                    is_expert=data.get("is_expert", False),
+                    status=DomainStatus(data.get("status", "untouched")),
+                    books_read=data.get("books_read", 0),
+                    last_read=date.fromisoformat(data["last_read"]) if data.get("last_read") else None,
+                )
+
+        # Fall back to file
         filepath = self.domain_filepath(domain_id)
         if not filepath.exists():
             raise DomainNotFoundError(domain_id)
 
         return Domain.from_file(filepath)
 
+    def _get_branch_name(self, branch_id: str) -> str:
+        """Get branch name from branch ID."""
+        for b in BRANCHES:
+            if str(b["branch_id"]).zfill(2) == branch_id.zfill(2):
+                return b["branch_name"]
+        return "Unknown"
+
     def save_domain(self, domain: Domain) -> None:
-        """Save a domain to its profile file.
+        """Save a domain to Supabase and/or profile file.
 
         Args:
             domain: Domain object to save.
         """
+        # Save to Supabase if available
+        if self.using_supabase:
+            self._supabase.update_domain_progress(
+                domain_id=domain.domain_id,
+                status=domain.status.value,
+                books_read=domain.books_read,
+                last_read=domain.last_read,
+            )
+
+        # Also save to file for Obsidian compatibility
         filepath = self.domain_filepath(domain.domain_id)
 
         # Load existing file to preserve content
@@ -226,11 +283,34 @@ class Vault:
             f.write(frontmatter.dumps(post))
 
     def load_all_domains(self) -> list[Domain]:
-        """Load all domains from the vault.
+        """Load all domains from Supabase or the vault.
 
         Returns:
             List of Domain objects.
         """
+        # Try Supabase first
+        if self.using_supabase:
+            data_list = self._supabase.get_all_domains()
+            if data_list:
+                domains = []
+                for data in data_list:
+                    domains.append(
+                        Domain(
+                            domain_id=data["domain_id"],
+                            domain_name=data["name"],
+                            branch_id=int(data["branch_id"]),
+                            branch_name=self._get_branch_name(data["branch_id"]),
+                            description=data.get("description", ""),
+                            is_hub=data.get("is_hub", False),
+                            is_expert=data.get("is_expert", False),
+                            status=DomainStatus(data.get("status", "untouched")),
+                            books_read=data.get("books_read", 0),
+                            last_read=date.fromisoformat(data["last_read"]) if data.get("last_read") else None,
+                        )
+                    )
+                return domains
+
+        # Fall back to file-based loading
         domains = []
         for domain_data in DOMAINS:
             domain_id = domain_data["domain_id"]
@@ -300,7 +380,7 @@ class Vault:
         return DailyLog.from_file(filepath)
 
     def save_daily_log(self, log: DailyLog, content: str = "") -> Path:
-        """Save a daily log.
+        """Save a daily log to Supabase and/or file.
 
         Args:
             log: DailyLog object to save.
@@ -309,6 +389,20 @@ class Vault:
         Returns:
             Path to the saved file.
         """
+        # Save to Supabase if available
+        if self.using_supabase:
+            log_data = {
+                "log_date": log.log_date.isoformat(),
+                "domain_id": log.domain_id,
+                "function_slot": log.function_slot,
+                "pages_read": log.pages_read,
+                "reading_time_minutes": log.reading_time_minutes,
+                "phase": log.phase,
+                "raw_notes": content if content else None,
+            }
+            self._supabase.create_daily_log(log_data)
+
+        # Also save to file for Obsidian compatibility
         filepath = self.daily_logs_dir / log.filename
         self.daily_logs_dir.mkdir(parents=True, exist_ok=True)
 

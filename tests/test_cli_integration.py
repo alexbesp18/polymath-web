@@ -16,6 +16,23 @@ from pm.commands.gaps import gaps
 from pm.commands.log import log
 
 
+@pytest.fixture(autouse=True)
+def disable_supabase(monkeypatch):
+    """Disable Supabase for all tests by setting testing flag."""
+    from pm.core.supabase_client import reset_supabase_client
+
+    # Reset the singleton client first
+    reset_supabase_client()
+
+    # Set testing mode to disable Supabase
+    monkeypatch.setenv("PM_TESTING", "1")
+
+    yield
+
+    # Reset again after test
+    reset_supabase_client()
+
+
 @pytest.fixture
 def temp_vault():
     """Create a temporary vault directory."""
