@@ -1,43 +1,42 @@
 # Polymath Engine - Project Plan
 
 ## Vision
-A personal knowledge management system for systematic polymathic learning across 170 academic/practical domains.
+A personal knowledge management system for systematic polymathic learning across 180 academic/practical domains.
 
 ## Current Priority
-**Phase: MVP COMPLETE → Polish & Harden**
+**Phase: MVP + WEB COMPLETE → P2 Features**
 
-### P0 - Immediate (This Session)
-1. Initialize git repository
-2. Fix domain data issues (180 vs 170, unknown entries)
-3. Add CLI integration tests
-4. Verify pm-log end-to-end workflow
-
-### P1 - Short Term
-1. Test with real Obsidian vault
-2. Add pm-distance command
-3. Add pm-connections command
+### Completed (P0/P1)
+- ✅ 8 CLI commands (init, status, next, pair, log, gaps, distance, connections)
+- ✅ 51 tests passing
+- ✅ Supabase backend (15 branches, 180 domains, distance matrix)
+- ✅ Next.js web app (191 pages, deployed to Vercel)
+- ✅ Real-time sync between CLI and web
 
 ### P2 - Medium Term
-1. Add pm-synthesize command
-2. Dashboard.md Dataview integration
-3. Problem-driven traversal phase
+1. Problem-driven traversal phase (TODO in traversal.py)
+2. pm-synthesize command (weekly synthesis generation)
+3. Expanded isomorphism database
+
+### P3 - Long Term
+1. AI integrations (LLM-powered synthesis)
+2. Mobile-responsive improvements
+3. Multi-vault support
+
+## Completed Goals
+- ✅ Web UI at https://polymath-web.vercel.app
+- ✅ Cloud sync via Supabase
+- ✅ Full workflow: init → next → log → status (CLI + web)
+- ✅ Git repo with clean history
+- ✅ README with usage instructions
 
 ## Non-Goals (Explicit)
-- Web UI (CLI only for MVP)
-- Multi-user support
-- Cloud sync
-- Mobile app
-- AI integrations (future phase)
-
-## Success Criteria
-- [ ] Can run full workflow: init → next → log → status
-- [ ] All 35+ tests passing
-- [ ] Git repo with clean history
-- [ ] README with usage instructions
+- Multi-user support (single-user system)
+- Mobile native app (web is mobile-responsive)
+- Offline-first (Supabase is primary)
 
 ## Tech Stack
-- Python 3.10+
-- Click CLI
-- PyYAML + python-frontmatter
-- Rich terminal formatting
-- pytest for testing
+- **CLI**: Python 3.10+, Click, Rich, python-frontmatter
+- **Backend**: Supabase (PostgreSQL, custom `polymath` schema)
+- **Web**: Next.js 16, TypeScript, Tailwind CSS, shadcn/ui
+- **Hosting**: Vercel
