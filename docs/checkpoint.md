@@ -1,4 +1,4 @@
-# Checkpoint - 2026-01-05
+# Checkpoint - 2026-01-06
 
 ## What's Done
 
@@ -27,10 +27,10 @@
 
 ### Next.js Web App (2026-01-05)
 - Next.js 16 with App Router and Server Components
-- 191 pages total (180 domain detail pages + 11 app pages)
+- 193 pages total (180 domain detail pages + 13 app pages)
 - TypeScript + Tailwind CSS + shadcn/ui
 - Algorithms ported: traversal, bisociation, distance
-- Pages: Dashboard, Domain Browser, Next Recommendation, Pair Generator, Gaps, Log Session, Distance Matrix, History
+- Pages: Dashboard, Domain Browser, Next Recommendation, Pair Generator, Gaps, Log Session, Distance Matrix, History, Connections
 - See: `docs/checkpoints/03-frontend-setup.md`, `04-core-pages.md`, `05-polish.md`
 
 ### Vercel Deployment (2026-01-05)
@@ -38,6 +38,16 @@
 - Environment variables configured
 - All pages validated
 - See: `docs/checkpoints/06-deploy.md`
+
+### UX Redesign (2026-01-06)
+- Redesigned for domain learning journeys
+- New Dashboard with "Continue Learning" hero card and hub progress
+- Domain Learning Page with progress tracker, book recommendations, reading history with insights
+- Log page with key insight capture and post-log celebration
+- Connections page with isomorphisms browser and bisociation generator
+- Simplified navigation: Today | Explore | Connections | History
+- Database: added key_insight column to daily_logs, created insights table
+- Curated book recommendations for 7 hub domains (42 books across 6 slots each)
 
 ## Current State
 

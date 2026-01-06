@@ -1,29 +1,10 @@
 /**
  * TypeScript types for Polymath Engine
+ * Simplified model: Binary read/not-read tracking, one book at a time
  */
 
-// Domain status progression
-export type DomainStatus =
-  | 'untouched'
-  | 'surveying'
-  | 'surveyed'
-  | 'deepening'
-  | 'expert';
-
-// Function slot types (6 slots per domain)
-export type FunctionSlot =
-  | 'FND'  // Foundation
-  | 'HRS'  // Heresy
-  | 'ORT'  // Orthodoxy
-  | 'FRN'  // Frontier
-  | 'HST'  // History
-  | 'BRG'; // Bridge
-
-// Traversal phases
-export type TraversalPhase =
-  | 'hub-completion'
-  | 'problem-driven'
-  | 'bisociation';
+// Simplified domain status (binary + in-progress)
+export type DomainStatus = 'unread' | 'reading' | 'read';
 
 // Branch type
 export interface Branch {
@@ -31,91 +12,88 @@ export interface Branch {
   name: string;
 }
 
-// Domain type
+// Base domain type
 export interface Domain {
   domain_id: string;      // "01.02", "02.04", etc.
   name: string;
   branch_id: string;
-  branch_name?: string;
   description?: string;
   is_hub: boolean;
   is_expert: boolean;
 }
 
-// Domain with progress (joined with domain_progress)
+// Domain with progress (joined view)
 export interface DomainWithProgress extends Domain {
   status: DomainStatus;
-  books_read: number;
-  last_read: string | null;  // ISO date string
+  book_title?: string;
+  book_author?: string;
+  completed_at?: string;
 }
 
-// Book type
-export interface Book {
+// Reading queue item
+export interface QueueItem {
   id: string;
-  title: string;
-  author?: string;
   domain_id: string;
-  function_slot?: FunctionSlot;
-  status: 'reading' | 'completed' | 'dropped';
-  date_started?: string;
-  date_finished?: string;
-  rating?: number;
-  pages?: number;
+  book_title: string;
+  book_author?: string;
+  position: number;
   created_at: string;
+  // Joined from domain
+  domain_name?: string;
+  branch_id?: string;
 }
 
-// Daily log type
-export interface DailyLog {
-  id: string;
-  log_date: string;
+// Current book (domain where status = 'reading')
+export interface CurrentBook {
   domain_id: string;
-  book_id?: string;
-  function_slot?: FunctionSlot;
-  pages_read: number;
-  reading_time_minutes: number;
-  phase: TraversalPhase;
-  raw_notes?: string;
-  created_at: string;
+  domain_name: string;
+  branch_id: string;
+  book_title: string;
+  book_author?: string;
 }
 
-// Config type
+// Config type (simplified)
 export interface Config {
   id: number;
-  current_phase: TraversalPhase;
-  hub_target_books: number;
+  current_phase?: string;
+  hub_target_books?: number;
   expert_domains?: string[];
   moderate_domains?: string[];
 }
 
-// Traversal recommendation
-export interface TraversalRecommendation {
-  domain: DomainWithProgress;
-  slot: FunctionSlot;
-  reason: string;
-  phase: TraversalPhase;
+// Insight type
+export interface Insight {
+  id: string;
+  domain_a: string;
+  domain_b?: string;
+  insight_type?: string;
+  content: string;
+  created_at: string;
 }
 
-// Bisociation pairing
+// Bisociation pairing (for connections page)
 export interface BisociationPair {
   anchor: DomainWithProgress;
   distant: DomainWithProgress;
   distance: number;
-  synthesis_prompts: string[];
   reason: string;
 }
 
-// Statistics
+// Branch distance entry
+export interface BranchDistance {
+  branch_a: string;
+  branch_b: string;
+  distance: number;
+}
+
+// Statistics (simplified)
 export interface Stats {
   total_domains: number;
-  domains_touched: number;
-  domains_surveying: number;
-  domains_surveyed: number;
-  domains_deepening: number;
-  domains_expert: number;
-  total_books_read: number;
-  total_daily_logs: number;
+  domains_read: number;
+  domains_reading: number;
+  domains_unread: number;
   branches_touched: number;
-  current_streak: number;
+  queue_length: number;
 }
 
 // Hub domain IDs (7 strategic hubs)
@@ -146,4 +124,23 @@ export const BRANCH_NAMES: Record<string, string> = {
   '13': 'Agriculture Environment',
   '14': 'Trades Applied Tech',
   '15': 'Religion Theology',
+};
+
+// Branch colors for visualization
+export const BRANCH_COLORS: Record<string, string> = {
+  '01': '#3B82F6', // blue
+  '02': '#22C55E', // green
+  '03': '#8B5CF6', // violet
+  '04': '#EC4899', // pink
+  '05': '#F97316', // orange
+  '06': '#EAB308', // yellow
+  '07': '#6366F1', // indigo
+  '08': '#EF4444', // red
+  '09': '#14B8A6', // teal
+  '10': '#84CC16', // lime
+  '11': '#F43F5E', // rose
+  '12': '#0EA5E9', // sky
+  '13': '#10B981', // emerald
+  '14': '#A855F7', // purple
+  '15': '#78716C', // stone
 };

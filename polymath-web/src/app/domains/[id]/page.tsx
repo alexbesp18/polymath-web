@@ -1,13 +1,12 @@
-import { getDomain, getBooks, getAllDomains } from '@/lib/supabase';
-import { getBranchDistance, getBranchName } from '@/lib/distance';
-import { getNextSlot, getSlotName } from '@/lib/traversal';
+import { getDomain, getAllDomains, getBranchDistances, getReadingQueue } from '@/lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { DomainActions } from '@/components/domain-actions';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { BRANCH_NAMES, BRANCH_COLORS } from '@/types';
 
-export const revalidate = 60;
+export const revalidate = 0;
 
 // Generate static params for all domains
 export async function generateStaticParams() {
@@ -15,242 +14,235 @@ export async function generateStaticParams() {
   return domains.map((d) => ({ id: d.domain_id }));
 }
 
-export default async function DomainDetail({
+export default async function DomainDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const domain = await getDomain(id);
+  const [domain, allDomains, distances, queue] = await Promise.all([
+    getDomain(id),
+    getAllDomains(),
+    getBranchDistances(),
+    getReadingQueue(),
+  ]);
 
   if (!domain) {
     notFound();
   }
 
-  const [books, allDomains] = await Promise.all([
-    getBooks(id),
-    getAllDomains(),
-  ]);
+  const branchName = BRANCH_NAMES[domain.branch_id] || domain.branch_id;
+  const branchColor = BRANCH_COLORS[domain.branch_id] || '#71717a';
+  const isQueued = queue.some(q => q.domain_id === domain.domain_id);
 
   // Get related domains (same branch)
   const relatedDomains = allDomains
     .filter((d) => d.branch_id === domain.branch_id && d.domain_id !== domain.domain_id)
     .slice(0, 6);
 
-  // Get distant domains
+  // Get distant domains for connections
   const distantDomains = allDomains
     .filter((d) => {
-      const distance = getBranchDistance(domain.branch_id, d.branch_id);
-      return distance >= 3 && d.domain_id !== domain.domain_id;
+      if (d.branch_id === domain.branch_id) return false;
+      const dist = distances.find(
+        dd => (dd.branch_a === domain.branch_id && dd.branch_b === d.branch_id) ||
+              (dd.branch_b === domain.branch_id && dd.branch_a === d.branch_id)
+      );
+      return dist && dist.distance >= 3;
     })
-    .slice(0, 6);
+    .slice(0, 4);
 
-  const branchName = getBranchName(domain.branch_id);
-  const nextSlot = getNextSlot(domain.books_read);
-
-  // Slot progression display
-  const slots = ['FND', 'HRS', 'ORT', 'FRN', 'HST', 'BRG'] as const;
+  // Book recommendation prompt
+  const bookPrompt = `Recommend 5 foundational books for ${domain.name} (${branchName}) that would give a comprehensive understanding of the field. Consider both classic texts and modern syntheses. For each book, explain why it's essential.`;
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
-      <header className="border-b bg-white dark:bg-zinc-900">
-        <div className="container mx-auto px-4 py-4">
-          <Link href="/" className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-            Polymath Engine
-          </Link>
-        </div>
-      </header>
+    <main className="container mx-auto px-4 py-8 max-w-3xl">
+      {/* Back link */}
+      <Link
+        href="/"
+        className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 mb-6 inline-flex items-center gap-1"
+      >
+        <span>←</span> Back to Tree
+      </Link>
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Breadcrumb */}
-        <nav className="text-sm text-zinc-500 mb-4">
-          <Link href="/domains" className="hover:text-zinc-900 dark:hover:text-zinc-100">
-            Domains
-          </Link>
-          {' → '}
-          <span>{domain.domain_id}</span>
-        </nav>
-
-        {/* Domain Header */}
-        <div className="mb-8">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-                {domain.domain_id} — {domain.name}
-              </h1>
-              <p className="text-lg text-zinc-500 mt-1">
-                Branch: {domain.branch_id} {branchName}
-              </p>
-            </div>
-            <div className="flex gap-2">
+      {/* Domain Header */}
+      <div className="mb-8">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span
+                className="text-sm font-mono font-bold"
+                style={{ color: branchColor }}
+              >
+                {domain.domain_id}
+              </span>
               {domain.is_hub && (
                 <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                  Hub Domain
+                  Hub
                 </Badge>
               )}
-              {domain.is_expert && (
-                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                  Expert Area
-                </Badge>
-              )}
-              <Badge variant="outline">{domain.status}</Badge>
+            </div>
+            <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+              {domain.name}
+            </h1>
+            <p className="text-zinc-500 mt-1">{branchName}</p>
+          </div>
+          <Badge
+            variant="outline"
+            className={`text-sm ${
+              domain.status === 'unread'
+                ? 'text-zinc-400 border-zinc-300'
+                : domain.status === 'reading'
+                ? 'text-blue-600 border-blue-300 bg-blue-50'
+                : 'text-green-600 border-green-300 bg-green-50'
+            }`}
+          >
+            {domain.status === 'unread' ? 'Not Read' : domain.status === 'reading' ? 'Reading' : 'Read'}
+          </Badge>
+        </div>
+
+        {domain.description && (
+          <p className="text-zinc-600 dark:text-zinc-400 mt-4 italic">
+            {domain.description}
+          </p>
+        )}
+
+        {/* Show current book if reading */}
+        {domain.status === 'reading' && domain.book_title && (
+          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+            <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Currently Reading</p>
+            <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+              {domain.book_title}
+            </p>
+            {domain.book_author && (
+              <p className="text-zinc-600 dark:text-zinc-400">by {domain.book_author}</p>
+            )}
+          </div>
+        )}
+
+        {/* Show completed book if read */}
+        {domain.status === 'read' && domain.book_title && (
+          <div className="mt-4 p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
+            <p className="text-sm text-green-600 dark:text-green-400 font-medium">Completed</p>
+            <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+              {domain.book_title}
+            </p>
+            {domain.book_author && (
+              <p className="text-zinc-600 dark:text-zinc-400">by {domain.book_author}</p>
+            )}
+            {domain.completed_at && (
+              <p className="text-xs text-zinc-500 mt-1">
+                Completed {new Date(domain.completed_at).toLocaleDateString()}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Add Book Form (only if not currently reading or already read) */}
+      {domain.status === 'unread' && (
+        <Card className="mb-6 border-2 border-dashed">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Add a Book to Read</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DomainActions
+              domainId={domain.domain_id}
+              domainName={domain.name}
+              isQueued={isQueued}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Book Recommendation Prompt */}
+      <Card className="mb-6">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <span>💡</span> Need Book Ideas?
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-zinc-500 mb-3">
+            Copy this prompt and paste it into Claude or ChatGPT:
+          </p>
+          <div className="relative">
+            <pre className="p-4 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-sm whitespace-pre-wrap">
+              {bookPrompt}
+            </pre>
+            <button
+              onClick={() => navigator.clipboard.writeText(bookPrompt)}
+              className="absolute top-2 right-2 px-2 py-1 text-xs bg-white dark:bg-zinc-700 rounded border hover:bg-zinc-50 dark:hover:bg-zinc-600"
+            >
+              Copy
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Related Domains */}
+      <Card className="mb-6">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg">Related Domains</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Same branch */}
+          <div>
+            <p className="text-sm text-zinc-500 mb-2">Same Branch ({branchName})</p>
+            <div className="flex flex-wrap gap-2">
+              {relatedDomains.map((d) => (
+                <Link
+                  key={d.domain_id}
+                  href={`/domains/${d.domain_id}`}
+                  className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+                    d.status === 'read'
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
+                      : d.status === 'reading'
+                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200'
+                      : 'bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                  }`}
+                >
+                  {d.name}
+                </Link>
+              ))}
             </div>
           </div>
-          {domain.description && (
-            <p className="text-zinc-600 dark:text-zinc-400 mt-4 italic">
-              {domain.description}
-            </p>
-          )}
-        </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          <Card>
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{domain.books_read}</div>
-              <p className="text-sm text-zinc-500">Books Read</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{nextSlot}</div>
-              <p className="text-sm text-zinc-500">Next Slot</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{domain.last_read || 'Never'}</div>
-              <p className="text-sm text-zinc-500">Last Read</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Slot Progression */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Function Slot Progression</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-2">
-              {slots.map((slot, index) => {
-                const isComplete = index < domain.books_read;
-                const isCurrent = index === domain.books_read;
-
-                return (
-                  <div
-                    key={slot}
-                    className={`flex-1 p-3 rounded-lg text-center ${
-                      isComplete
-                        ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
-                        : isCurrent
-                        ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 ring-2 ring-blue-500'
-                        : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400'
-                    }`}
-                  >
-                    <div className="font-bold">{slot}</div>
-                    <div className="text-xs mt-1">{getSlotName(slot)}</div>
-                    {isComplete && <div className="text-xs mt-1">✓</div>}
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Books in this Domain */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Books Read ({books.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {books.length === 0 ? (
-              <p className="text-zinc-500">No books logged yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {books.map((book) => (
-                  <div
-                    key={book.id}
-                    className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg"
-                  >
-                    <div>
-                      <p className="font-medium">{book.title}</p>
-                      {book.author && (
-                        <p className="text-sm text-zinc-500">by {book.author}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {book.function_slot && (
-                        <Badge variant="outline">{book.function_slot}</Badge>
-                      )}
-                      {book.rating && (
-                        <span className="text-yellow-500">
-                          {'★'.repeat(book.rating)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Related Domains */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Same Branch</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {relatedDomains.map((d) => (
-                  <Link
-                    key={d.domain_id}
-                    href={`/domains/${d.domain_id}`}
-                    className="block p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors"
-                  >
-                    <span className="text-zinc-400 text-sm">{d.domain_id}</span>{' '}
-                    <span className="font-medium">{d.name}</span>
-                  </Link>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Distant Domains</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
+          {/* Distant domains */}
+          {distantDomains.length > 0 && (
+            <div>
+              <p className="text-sm text-zinc-500 mb-2">Distant Domains (for Bisociation)</p>
+              <div className="flex flex-wrap gap-2">
                 {distantDomains.map((d) => (
                   <Link
                     key={d.domain_id}
                     href={`/domains/${d.domain_id}`}
-                    className="block p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors"
+                    className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 rounded-full text-sm hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
                   >
-                    <span className="text-zinc-400 text-sm">{d.domain_id}</span>{' '}
-                    <span className="font-medium">{d.name}</span>
-                    <Badge variant="outline" className="ml-2 text-xs">
-                      dist: {getBranchDistance(domain.branch_id, d.branch_id)}
-                    </Badge>
+                    {d.name}
                   </Link>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-        {/* Actions */}
-        <div className="mt-8 flex justify-center gap-4">
-          <Link
-            href={`/log?domain=${domain.domain_id}`}
-            className="inline-flex items-center justify-center rounded-md bg-blue-600 px-6 py-2 text-white font-medium hover:bg-blue-700 transition-colors"
-          >
-            Log Reading Session
-          </Link>
-        </div>
-      </main>
-    </div>
+      {/* Navigation */}
+      <div className="flex justify-center gap-4">
+        <Link
+          href="/"
+          className="px-6 py-2 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+        >
+          Back to Tree
+        </Link>
+        <Link
+          href="/reference"
+          className="px-6 py-2 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+        >
+          Browse All Domains
+        </Link>
+      </div>
+    </main>
   );
 }
