@@ -2,6 +2,7 @@ import { getDomain, getAllDomains, getBranchDistances, getReadingQueue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DomainActions } from '@/components/domain-actions';
+import { CopyButton } from '@/components/copy-button';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { BRANCH_NAMES, BRANCH_COLORS } from '@/types';
@@ -170,12 +171,7 @@ export default async function DomainDetailPage({
             <pre className="p-4 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-sm whitespace-pre-wrap">
               {bookPrompt}
             </pre>
-            <button
-              onClick={() => navigator.clipboard.writeText(bookPrompt)}
-              className="absolute top-2 right-2 px-2 py-1 text-xs bg-white dark:bg-zinc-700 rounded border hover:bg-zinc-50 dark:hover:bg-zinc-600"
-            >
-              Copy
-            </button>
+            <CopyButton text={bookPrompt} />
           </div>
         </CardContent>
       </Card>
