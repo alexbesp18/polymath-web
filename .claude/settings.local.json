@@ -59,7 +59,9 @@
       "Bash(for comp in reading-queue domain-actions save-insight-button)",
       "Bash(do)",
       "Bash(echo:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(xargs ls:*)",
+      "Bash(git tag:*)"
     ]
   }
 }

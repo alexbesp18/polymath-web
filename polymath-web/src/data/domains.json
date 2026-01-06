@@ -1,0 +1,288 @@
+{
+  "branches": [
+    {
+      "id": "01",
+      "name": "Physical Sciences",
+      "domains": [
+        { "id": "01.01", "name": "Classical Mechanics", "description": "Motion, forces, energy at human scale", "isHub": false },
+        { "id": "01.02", "name": "Thermodynamics", "description": "Heat, entropy, energy transfer", "isHub": true },
+        { "id": "01.03", "name": "Electromagnetism", "description": "Electric/magnetic fields, light", "isHub": false },
+        { "id": "01.04", "name": "Quantum Mechanics", "description": "Subatomic behavior, wave functions", "isHub": false },
+        { "id": "01.05", "name": "Relativity / Cosmology", "description": "Spacetime, gravity, universe structure", "isHub": false },
+        { "id": "01.06", "name": "Particle Physics", "description": "Fundamental particles, standard model", "isHub": false },
+        { "id": "01.07", "name": "Organic Chemistry", "description": "Carbon-based compounds", "isHub": false },
+        { "id": "01.08", "name": "Inorganic Chemistry", "description": "Non-carbon compounds, metals", "isHub": false },
+        { "id": "01.09", "name": "Physical Chemistry", "description": "Chemical systems via physics", "isHub": false },
+        { "id": "01.10", "name": "Geology / Earth Systems", "description": "Rock, plate tectonics, geomorphology", "isHub": false },
+        { "id": "01.11", "name": "Oceanography", "description": "Ocean systems, currents, marine chemistry", "isHub": false },
+        { "id": "01.12", "name": "Atmospheric Science", "description": "Weather, climate, air composition", "isHub": false },
+        { "id": "01.13", "name": "Astronomy / Astrophysics", "description": "Celestial objects, stellar evolution", "isHub": false }
+      ]
+    },
+    {
+      "id": "02",
+      "name": "Life Sciences",
+      "domains": [
+        { "id": "02.01", "name": "Molecular Biology", "description": "DNA, RNA, protein synthesis", "isHub": false },
+        { "id": "02.02", "name": "Cell Biology", "description": "Cell structure, organelles, division", "isHub": false },
+        { "id": "02.03", "name": "Genetics / Genomics", "description": "Heredity, gene expression, sequencing", "isHub": false },
+        { "id": "02.04", "name": "Evolutionary Biology", "description": "Natural selection, speciation, phylogenetics", "isHub": true },
+        { "id": "02.05", "name": "Ecology", "description": "Organism-environment interactions", "isHub": false },
+        { "id": "02.06", "name": "Microbiology", "description": "Bacteria, viruses, fungi", "isHub": false },
+        { "id": "02.07", "name": "Botany / Plant Science", "description": "Plant physiology, taxonomy", "isHub": false },
+        { "id": "02.08", "name": "Zoology", "description": "Animal physiology, behavior", "isHub": false },
+        { "id": "02.09", "name": "Developmental Biology", "description": "Embryology, morphogenesis", "isHub": false },
+        { "id": "02.10", "name": "Systems Biology", "description": "Biological networks, computational models", "isHub": false },
+        { "id": "02.11", "name": "Marine Biology", "description": "Ocean life systems", "isHub": false },
+        { "id": "02.12", "name": "Entomology", "description": "Insects", "isHub": false }
+      ]
+    },
+    {
+      "id": "03",
+      "name": "Formal Sciences",
+      "domains": [
+        { "id": "03.01", "name": "Algebra / Number Theory", "description": "Abstract structures, integers, primes", "isHub": false },
+        { "id": "03.02", "name": "Geometry / Topology", "description": "Spatial properties, continuous deformation", "isHub": false },
+        { "id": "03.03", "name": "Analysis / Calculus", "description": "Limits, continuity, change", "isHub": false },
+        { "id": "03.04", "name": "Probability / Statistics", "description": "Uncertainty, inference, distributions", "isHub": true },
+        { "id": "03.05", "name": "Logic / Set Theory", "description": "Valid reasoning, foundations", "isHub": false },
+        { "id": "03.06", "name": "Combinatorics / Graph Theory", "description": "Counting, discrete structures, networks", "isHub": true },
+        { "id": "03.07", "name": "Information Theory", "description": "Encoding, compression, channel capacity", "isHub": true },
+        { "id": "03.08", "name": "Computation Theory", "description": "Algorithms, complexity, computability", "isHub": false },
+        { "id": "03.09", "name": "Game Theory", "description": "Strategic interaction, equilibria", "isHub": true },
+        { "id": "03.10", "name": "Decision Theory", "description": "Choice under uncertainty", "isHub": false },
+        { "id": "03.11", "name": "Category Theory", "description": "Mathematical structure of structures", "isHub": false }
+      ]
+    },
+    {
+      "id": "04",
+      "name": "Mind Sciences",
+      "domains": [
+        { "id": "04.01", "name": "Cognitive Psychology", "description": "Attention, memory, reasoning", "isHub": false },
+        { "id": "04.02", "name": "Developmental Psychology", "description": "Lifespan mental changes", "isHub": false },
+        { "id": "04.03", "name": "Social Psychology", "description": "Interpersonal influence, group behavior", "isHub": false },
+        { "id": "04.04", "name": "Clinical Psychology", "description": "Psychopathology, treatment", "isHub": false },
+        { "id": "04.05", "name": "Evolutionary Psychology", "description": "Adaptive origins of cognition", "isHub": false },
+        { "id": "04.06", "name": "Cognitive Neuroscience", "description": "Neural basis of mental processes", "isHub": false },
+        { "id": "04.07", "name": "Perception / Sensation", "description": "How senses construct reality", "isHub": false },
+        { "id": "04.08", "name": "Behavioral Neuroscience", "description": "Brain-behavior relationships", "isHub": false },
+        { "id": "04.09", "name": "Consciousness Studies", "description": "Subjective experience, awareness", "isHub": false },
+        { "id": "04.10", "name": "Psycholinguistics", "description": "Language processing in the mind", "isHub": false }
+      ]
+    },
+    {
+      "id": "05",
+      "name": "Social Sciences",
+      "domains": [
+        { "id": "05.01", "name": "Microeconomics", "description": "Individual/firm decision-making", "isHub": false },
+        { "id": "05.02", "name": "Macroeconomics", "description": "Aggregate economies, policy", "isHub": false },
+        { "id": "05.03", "name": "Behavioral Economics", "description": "Psychological drivers of economic choice", "isHub": false },
+        { "id": "05.04", "name": "Development Economics", "description": "Economic growth in poor countries", "isHub": false },
+        { "id": "05.05", "name": "Finance Theory", "description": "Asset pricing, risk, markets", "isHub": false },
+        { "id": "05.06", "name": "Sociology of Organizations", "description": "How institutions structure behavior", "isHub": false },
+        { "id": "05.07", "name": "Sociology of Culture", "description": "Meaning-making, norms, identity", "isHub": false },
+        { "id": "05.08", "name": "Political Economy", "description": "Power and resource distribution", "isHub": false },
+        { "id": "05.09", "name": "Comparative Politics", "description": "Political systems across countries", "isHub": false },
+        { "id": "05.10", "name": "International Relations", "description": "State interactions, war, cooperation", "isHub": false },
+        { "id": "05.11", "name": "Geopolitics", "description": "Geography and power", "isHub": false },
+        { "id": "05.12", "name": "Cultural Anthropology", "description": "Human societies, ethnography", "isHub": false },
+        { "id": "05.13", "name": "Linguistics", "description": "Language structure, change, use", "isHub": false },
+        { "id": "05.14", "name": "Demography", "description": "Population dynamics", "isHub": false },
+        { "id": "05.15", "name": "Urban Studies", "description": "Cities as systems", "isHub": false },
+        { "id": "05.16", "name": "Criminology", "description": "Crime causation, justice systems", "isHub": false }
+      ]
+    },
+    {
+      "id": "06",
+      "name": "Humanities",
+      "domains": [
+        { "id": "06.01", "name": "Metaphysics", "description": "Nature of reality, existence", "isHub": false },
+        { "id": "06.02", "name": "Epistemology", "description": "Knowledge, justification, belief", "isHub": false },
+        { "id": "06.03", "name": "Ethics / Moral Philosophy", "description": "Right action, value", "isHub": false },
+        { "id": "06.04", "name": "Political Philosophy", "description": "Justice, authority, rights", "isHub": false },
+        { "id": "06.05", "name": "Philosophy of Mind", "description": "Mental states, consciousness", "isHub": false },
+        { "id": "06.06", "name": "Philosophy of Science", "description": "Scientific method, explanation", "isHub": false },
+        { "id": "06.07", "name": "Aesthetics", "description": "Beauty, art, taste", "isHub": false },
+        { "id": "06.08", "name": "Ancient History", "description": "Pre-500 CE civilizations", "isHub": false },
+        { "id": "06.09", "name": "Medieval History", "description": "500-1500 CE", "isHub": false },
+        { "id": "06.10", "name": "Early Modern History", "description": "1500-1800", "isHub": false },
+        { "id": "06.11", "name": "Modern History", "description": "1800-present", "isHub": false },
+        { "id": "06.12", "name": "Historiography", "description": "How history is written", "isHub": false },
+        { "id": "06.13", "name": "Literary Theory / Criticism", "description": "How texts produce meaning", "isHub": false },
+        { "id": "06.14", "name": "Classics", "description": "Greek/Roman civilization", "isHub": false },
+        { "id": "06.15", "name": "Intellectual History", "description": "History of ideas", "isHub": false },
+        { "id": "06.16", "name": "Rhetoric / Composition", "description": "Persuasion, argument, writing", "isHub": false }
+      ]
+    },
+    {
+      "id": "07",
+      "name": "Engineering",
+      "domains": [
+        { "id": "07.01", "name": "Mechanical Engineering", "description": "Machines, thermal systems", "isHub": false },
+        { "id": "07.02", "name": "Electrical Engineering", "description": "Circuits, power, signals", "isHub": false },
+        { "id": "07.03", "name": "Civil / Structural Engineering", "description": "Infrastructure, buildings", "isHub": false },
+        { "id": "07.04", "name": "Chemical Engineering", "description": "Process design, reactions at scale", "isHub": false },
+        { "id": "07.05", "name": "Materials Science", "description": "Properties of matter for use", "isHub": false },
+        { "id": "07.06", "name": "Aerospace Engineering", "description": "Aircraft, spacecraft", "isHub": false },
+        { "id": "07.07", "name": "Computer Architecture", "description": "Hardware design, processors", "isHub": false },
+        { "id": "07.08", "name": "Software Engineering", "description": "Building reliable software systems", "isHub": false },
+        { "id": "07.09", "name": "AI / Machine Learning", "description": "Intelligent systems", "isHub": false },
+        { "id": "07.10", "name": "Networks / Distributed Systems", "description": "Communication, coordination", "isHub": false },
+        { "id": "07.11", "name": "Robotics", "description": "Autonomous physical agents", "isHub": false },
+        { "id": "07.12", "name": "Biomedical Engineering", "description": "Engineering for medicine", "isHub": false },
+        { "id": "07.13", "name": "Environmental Engineering", "description": "Pollution, remediation", "isHub": false },
+        { "id": "07.14", "name": "Systems Engineering", "description": "Complex system integration, feedback, control", "isHub": true },
+        { "id": "07.15", "name": "Industrial Engineering", "description": "Optimization, operations", "isHub": false },
+        { "id": "07.16", "name": "Nuclear Engineering", "description": "Fission, fusion, radiation", "isHub": false }
+      ]
+    },
+    {
+      "id": "08",
+      "name": "Health / Medicine",
+      "domains": [
+        { "id": "08.01", "name": "Anatomy / Physiology", "description": "Body structure and function", "isHub": false },
+        { "id": "08.02", "name": "Pathology", "description": "Disease mechanisms", "isHub": false },
+        { "id": "08.03", "name": "Pharmacology", "description": "Drug action, development", "isHub": false },
+        { "id": "08.04", "name": "Immunology", "description": "Immune system function", "isHub": false },
+        { "id": "08.05", "name": "Epidemiology", "description": "Disease patterns in populations", "isHub": false },
+        { "id": "08.06", "name": "Public Health", "description": "Population health interventions", "isHub": false },
+        { "id": "08.07", "name": "Nutrition Science", "description": "Diet and health", "isHub": false },
+        { "id": "08.08", "name": "Psychiatry", "description": "Mental illness treatment", "isHub": false },
+        { "id": "08.09", "name": "Surgery", "description": "Operative intervention", "isHub": false },
+        { "id": "08.10", "name": "Internal Medicine", "description": "Adult non-surgical disease", "isHub": false },
+        { "id": "08.11", "name": "Pediatrics", "description": "Child health", "isHub": false },
+        { "id": "08.12", "name": "Geriatrics", "description": "Aging and elder care", "isHub": false },
+        { "id": "08.13", "name": "Emergency Medicine", "description": "Acute care", "isHub": false },
+        { "id": "08.14", "name": "Nursing Science", "description": "Care delivery", "isHub": false },
+        { "id": "08.15", "name": "Rehabilitation Sciences", "description": "Recovery of function", "isHub": false }
+      ]
+    },
+    {
+      "id": "09",
+      "name": "Business / Management",
+      "domains": [
+        { "id": "09.01", "name": "Corporate Strategy", "description": "Competitive positioning, growth", "isHub": false },
+        { "id": "09.02", "name": "Operations / Supply Chain", "description": "Production, logistics, flow", "isHub": false },
+        { "id": "09.03", "name": "Marketing / Consumer Behavior", "description": "Demand creation, persuasion", "isHub": false },
+        { "id": "09.04", "name": "Corporate Finance", "description": "Capital structure, valuation", "isHub": false },
+        { "id": "09.05", "name": "Accounting", "description": "Measurement, reporting", "isHub": false },
+        { "id": "09.06", "name": "Organizational Behavior", "description": "People in organizations", "isHub": false },
+        { "id": "09.07", "name": "Entrepreneurship", "description": "Venture creation", "isHub": false },
+        { "id": "09.08", "name": "Negotiation / Influence", "description": "Deal-making, persuasion", "isHub": false },
+        { "id": "09.09", "name": "Leadership", "description": "Directing collective action", "isHub": false },
+        { "id": "09.10", "name": "Human Resource Management", "description": "Talent systems", "isHub": false },
+        { "id": "09.11", "name": "Real Estate", "description": "Property markets, development", "isHub": false },
+        { "id": "09.12", "name": "Insurance / Risk Management", "description": "Risk transfer, pricing", "isHub": false }
+      ]
+    },
+    {
+      "id": "10",
+      "name": "Education",
+      "domains": [
+        { "id": "10.01", "name": "Curriculum Design", "description": "What to teach, sequencing", "isHub": false },
+        { "id": "10.02", "name": "Pedagogy / Instructional Methods", "description": "How to teach", "isHub": false },
+        { "id": "10.03", "name": "Educational Psychology", "description": "Learning, motivation, development", "isHub": false },
+        { "id": "10.04", "name": "Educational Assessment", "description": "Measuring learning", "isHub": false },
+        { "id": "10.05", "name": "Educational Administration", "description": "Running schools/systems", "isHub": false },
+        { "id": "10.06", "name": "Special Education", "description": "Atypical learners", "isHub": false },
+        { "id": "10.07", "name": "Adult / Continuing Education", "description": "Post-formal learning", "isHub": false },
+        { "id": "10.08", "name": "Educational Technology", "description": "Tools for learning", "isHub": false },
+        { "id": "10.09", "name": "Higher Education Studies", "description": "Universities as institutions", "isHub": false }
+      ]
+    },
+    {
+      "id": "11",
+      "name": "Arts / Design / Communication",
+      "domains": [
+        { "id": "11.01", "name": "Visual Arts / Art History", "description": "Painting, sculpture, history", "isHub": false },
+        { "id": "11.02", "name": "Architecture", "description": "Building design", "isHub": false },
+        { "id": "11.03", "name": "Industrial / Product Design", "description": "Object design for use", "isHub": false },
+        { "id": "11.04", "name": "Graphic / Communication Design", "description": "Visual messaging", "isHub": false },
+        { "id": "11.05", "name": "Film / Media Studies", "description": "Moving image, media theory", "isHub": false },
+        { "id": "11.06", "name": "Music Theory / Composition", "description": "Sound organization", "isHub": false },
+        { "id": "11.07", "name": "Theater / Performance", "description": "Live embodied art", "isHub": false },
+        { "id": "11.08", "name": "Creative Writing", "description": "Prose, poetry craft", "isHub": false },
+        { "id": "11.09", "name": "Journalism", "description": "News gathering, reporting", "isHub": false },
+        { "id": "11.10", "name": "Advertising / PR", "description": "Commercial persuasion", "isHub": false },
+        { "id": "11.11", "name": "Photography", "description": "Image capture, meaning", "isHub": false },
+        { "id": "11.12", "name": "Game Design", "description": "Interactive experience design", "isHub": false }
+      ]
+    },
+    {
+      "id": "12",
+      "name": "Law / Public Administration",
+      "domains": [
+        { "id": "12.01", "name": "Constitutional Law", "description": "Fundamental legal structure", "isHub": false },
+        { "id": "12.02", "name": "Criminal Law", "description": "Prosecution, defense, punishment", "isHub": false },
+        { "id": "12.03", "name": "Civil / Contract Law", "description": "Private disputes, agreements", "isHub": false },
+        { "id": "12.04", "name": "Corporate / Commercial Law", "description": "Business legal framework", "isHub": false },
+        { "id": "12.05", "name": "International Law", "description": "Cross-border legal systems", "isHub": false },
+        { "id": "12.06", "name": "Administrative Law", "description": "Government agency regulation", "isHub": false },
+        { "id": "12.07", "name": "Public Policy Analysis", "description": "Policy design, evaluation", "isHub": false },
+        { "id": "12.08", "name": "Public Administration", "description": "Government management", "isHub": false },
+        { "id": "12.09", "name": "Social Work", "description": "Human services delivery", "isHub": false },
+        { "id": "12.10", "name": "Nonprofit Management", "description": "Third sector organizations", "isHub": false }
+      ]
+    },
+    {
+      "id": "13",
+      "name": "Agriculture / Environment",
+      "domains": [
+        { "id": "13.01", "name": "Agronomy / Crop Science", "description": "Plant cultivation", "isHub": false },
+        { "id": "13.02", "name": "Animal Science", "description": "Livestock production", "isHub": false },
+        { "id": "13.03", "name": "Soil Science", "description": "Soil composition, fertility", "isHub": false },
+        { "id": "13.04", "name": "Food Science / Technology", "description": "Processing, safety", "isHub": false },
+        { "id": "13.05", "name": "Veterinary Science", "description": "Animal health", "isHub": false },
+        { "id": "13.06", "name": "Forestry", "description": "Forest management", "isHub": false },
+        { "id": "13.07", "name": "Fisheries / Aquaculture", "description": "Aquatic resource management", "isHub": false },
+        { "id": "13.08", "name": "Wildlife Management", "description": "Wild animal populations", "isHub": false },
+        { "id": "13.09", "name": "Environmental Policy", "description": "Regulation, conservation law", "isHub": false },
+        { "id": "13.10", "name": "Sustainable Systems", "description": "Regenerative design", "isHub": false }
+      ]
+    },
+    {
+      "id": "14",
+      "name": "Trades / Applied Tech",
+      "domains": [
+        { "id": "14.01", "name": "Construction Trades", "description": "Building, carpentry, masonry", "isHub": false },
+        { "id": "14.02", "name": "Electrical Trades", "description": "Wiring, installation", "isHub": false },
+        { "id": "14.03", "name": "Plumbing / HVAC", "description": "Water, heating, cooling systems", "isHub": false },
+        { "id": "14.04", "name": "Automotive Technology", "description": "Vehicle repair, systems", "isHub": false },
+        { "id": "14.05", "name": "Welding / Metalwork", "description": "Joining, fabrication", "isHub": false },
+        { "id": "14.06", "name": "Machining / CNC", "description": "Precision manufacturing", "isHub": false },
+        { "id": "14.07", "name": "Aviation Maintenance", "description": "Aircraft systems", "isHub": false },
+        { "id": "14.08", "name": "Transportation / Logistics", "description": "Moving goods, routing", "isHub": false },
+        { "id": "14.09", "name": "Culinary Arts", "description": "Food preparation, service", "isHub": false },
+        { "id": "14.10", "name": "Cosmetology / Personal Services", "description": "Grooming, aesthetics", "isHub": false }
+      ]
+    },
+    {
+      "id": "15",
+      "name": "Religion / Theology",
+      "domains": [
+        { "id": "15.01", "name": "Comparative Religion", "description": "Cross-tradition analysis", "isHub": false },
+        { "id": "15.02", "name": "Biblical Studies", "description": "Text, history, interpretation", "isHub": false },
+        { "id": "15.03", "name": "Systematic Theology", "description": "Doctrine, belief systems", "isHub": false },
+        { "id": "15.04", "name": "Practical Theology", "description": "Ministry, pastoral care", "isHub": false },
+        { "id": "15.05", "name": "Islamic Studies", "description": "Quran, hadith, jurisprudence", "isHub": false },
+        { "id": "15.06", "name": "Buddhist Studies", "description": "Dharma, practice traditions", "isHub": false },
+        { "id": "15.07", "name": "Jewish Studies", "description": "Torah, Talmud, history", "isHub": false },
+        { "id": "15.08", "name": "Mysticism / Contemplative Studies", "description": "Direct experience traditions", "isHub": false }
+      ]
+    }
+  ],
+  "slots": [
+    { "code": "FND", "name": "Foundation", "description": "Core concepts, entry point" },
+    { "code": "ORT", "name": "Orthodoxy", "description": "Mainstream consensus view" },
+    { "code": "HRS", "name": "Heresy", "description": "Contrarian/alternative takes" },
+    { "code": "FRN", "name": "Frontier", "description": "Active research, cutting edge" },
+    { "code": "HST", "name": "History", "description": "How the field evolved" },
+    { "code": "BRG", "name": "Bridge", "description": "Cross-domain connections" }
+  ],
+  "hubDomains": ["01.02", "02.04", "03.04", "03.06", "03.07", "03.09", "07.14"],
+  "stats": {
+    "totalBranches": 15,
+    "totalDomains": 180,
+    "totalSlots": 1080
+  }
+}
