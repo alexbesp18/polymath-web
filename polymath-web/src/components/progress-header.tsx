@@ -2,6 +2,7 @@
 
 import { Progress } from './ui/progress';
 import { Button } from './ui/button';
+import { SlotLegend } from './slot-legend';
 import { TOTAL_SLOTS, TOTAL_DOMAINS, SLOT_CODES } from '@/lib/constants';
 import { allDomains } from '@/lib/domains';
 import type { SlotProgress } from '@/types';
@@ -48,6 +49,7 @@ export function ProgressHeader({ progressMap, onPickRandom }: ProgressHeaderProp
             {domainsStarted} started · {domainsComplete} complete
           </span>
         </div>
+        <SlotLegend />
       </div>
     </div>
   );
