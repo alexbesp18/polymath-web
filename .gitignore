@@ -46,3 +46,13 @@ Thumbs.db
 
 # Project specific
 *.log
+
+# Environment
+.env
+.env.local
+.env*.local
+
+# Node (polymath-web)
+node_modules/
+.next/
+.vercel/
