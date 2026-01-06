@@ -53,7 +53,13 @@
       "Bash(git push:*)",
       "mcp__vercel__get_project",
       "mcp__vercel__list_deployments",
-      "mcp__vercel__get_deployment_build_logs"
+      "mcp__vercel__get_deployment_build_logs",
+      "mcp__vercel__list_projects",
+      "Bash(xargs -I {} sh -c 'echo \"\"=== {} ===\"\" && grep \"\"import.*supabase\"\" {}')",
+      "Bash(for comp in reading-queue domain-actions save-insight-button)",
+      "Bash(do)",
+      "Bash(echo:*)",
+      "Bash(done)"
     ]
   }
 }

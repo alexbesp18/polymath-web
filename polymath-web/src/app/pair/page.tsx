@@ -2,7 +2,6 @@ import { getAllDomains, getConfig } from '@/lib/supabase';
 import { generatePairing, formatPairingForDisplay } from '@/lib/bisociation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { SaveInsightButton } from '@/components/save-insight-button';
 import Link from 'next/link';
 
 export const revalidate = 0; // Always fresh
