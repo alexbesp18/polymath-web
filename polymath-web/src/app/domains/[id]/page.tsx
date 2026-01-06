@@ -15,13 +15,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { FunctionSlot } from '@/types';
 
-export const revalidate = 60;
-
-// Generate static params for all domains
-export async function generateStaticParams() {
-  const domains = await getAllDomains();
-  return domains.map((d) => ({ id: d.domain_id }));
-}
+// Dynamic rendering - avoid overwhelming Supabase during build
+export const dynamic = 'force-dynamic';
 
 export default async function DomainLearningPage({
   params,
