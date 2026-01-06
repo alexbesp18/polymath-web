@@ -15,7 +15,8 @@ interface Domain {
   domain_id: string;
   name: string;
   branch_id: string;
-  status: 'unread' | 'reading' | 'read';
+  books_read: number;
+  status: string;
 }
 
 const branchNames: Record<string, string> = {
@@ -34,12 +35,6 @@ const branchNames: Record<string, string> = {
   '13': 'History',
   '14': 'Law & Politics',
   '15': 'Religion',
-};
-
-const statusIcons: Record<string, string> = {
-  unread: '',
-  reading: '📖',
-  read: '✓',
 };
 
 export function CommandPalette() {
@@ -129,17 +124,14 @@ export function CommandPalette() {
 
               {/* Quick actions */}
               <CommandGroup heading="Quick Actions">
-                <CommandItem onSelect={() => { setOpen(false); router.push('/'); }}>
-                  🌳 Knowledge Tree
+                <CommandItem onSelect={() => { setOpen(false); router.push('/log'); }}>
+                  📝 Log Reading Session
                 </CommandItem>
-                <CommandItem onSelect={() => { setOpen(false); router.push('/connections'); }}>
-                  🔀 Bisociation Connections
+                <CommandItem onSelect={() => { setOpen(false); router.push('/pair'); }}>
+                  🔀 Generate Bisociation Pair
                 </CommandItem>
-                <CommandItem onSelect={() => { setOpen(false); router.push('/reference'); }}>
-                  📚 Browse All Domains
-                </CommandItem>
-                <CommandItem onSelect={() => { setOpen(false); router.push('/distance'); }}>
-                  📐 Distance Matrix
+                <CommandItem onSelect={() => { setOpen(false); router.push('/next'); }}>
+                  ➡️ Next Recommended Domain
                 </CommandItem>
               </CommandGroup>
 
@@ -156,15 +148,8 @@ export function CommandPalette() {
                     >
                       <span className="text-zinc-400 w-12">{domain.domain_id}</span>
                       <span className="flex-1">{domain.name}</span>
-                      <span className={`text-xs ${
-                        domain.status === 'read'
-                          ? 'text-green-600'
-                          : domain.status === 'reading'
-                          ? 'text-blue-600'
-                          : 'text-zinc-400'
-                      }`}>
-                        {statusIcons[domain.status]}
-                        {domain.status === 'read' ? ' Read' : domain.status === 'reading' ? ' Reading' : ''}
+                      <span className="text-xs text-zinc-500">
+                        {domain.books_read}/6
                       </span>
                     </CommandItem>
                   ))}

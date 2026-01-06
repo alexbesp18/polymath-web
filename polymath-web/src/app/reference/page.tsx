@@ -1,5 +1,5 @@
-import { getAllDomains, getAllBranches } from '@/lib/supabase';
-import { Card, CardContent } from '@/components/ui/card';
+import { getAllDomains, getAllBranches, getBranchDistances } from '@/lib/supabase';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import Link from 'next/link';
@@ -8,9 +8,10 @@ import { BRANCH_NAMES, BRANCH_COLORS } from '@/types';
 export const revalidate = 60;
 
 export default async function ReferencePage() {
-  const [domains, branches] = await Promise.all([
+  const [domains, branches, distances] = await Promise.all([
     getAllDomains(),
     getAllBranches(),
+    getBranchDistances(),
   ]);
 
   // Group by branch

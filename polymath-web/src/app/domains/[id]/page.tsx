@@ -1,13 +1,21 @@
-import { getDomain, getAllDomains, getBranchDistances, getReadingQueue } from '@/lib/supabase';
+import { getDomain, getBooks, getAllDomains, getDomainLogs } from '@/lib/supabase';
+import { getBranchDistance, getBranchName } from '@/lib/distance';
+import { getNextSlot } from '@/lib/traversal';
+import {
+  getBookRecommendations,
+  hasBookRecommendations,
+  getConnectedDomains,
+  getDomainIsomorphisms,
+  type BookRecommendation,
+} from '@/lib/hub-books';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { DomainActions } from '@/components/domain-actions';
-import { CopyButton } from '@/components/copy-button';
+import { SlotSelector } from '@/components/slot-selector';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { BRANCH_NAMES, BRANCH_COLORS } from '@/types';
+import type { FunctionSlot } from '@/types';
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 // Generate static params for all domains
 export async function generateStaticParams() {
@@ -15,230 +23,287 @@ export async function generateStaticParams() {
   return domains.map((d) => ({ id: d.domain_id }));
 }
 
-export default async function DomainDetailPage({
+export default async function DomainLearningPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [domain, allDomains, distances, queue] = await Promise.all([
-    getDomain(id),
-    getAllDomains(),
-    getBranchDistances(),
-    getReadingQueue(),
-  ]);
+  const domain = await getDomain(id);
 
   if (!domain) {
     notFound();
   }
 
-  const branchName = BRANCH_NAMES[domain.branch_id] || domain.branch_id;
-  const branchColor = BRANCH_COLORS[domain.branch_id] || '#71717a';
-  const isQueued = queue.some(q => q.domain_id === domain.domain_id);
+  const [books, allDomains, logs] = await Promise.all([
+    getBooks(id),
+    getAllDomains(),
+    getDomainLogs(id),
+  ]);
+
+  const branchName = getBranchName(domain.branch_id);
+  const nextSlot = getNextSlot(domain.books_read);
+  const hasRecommendations = hasBookRecommendations(id);
+  const isomorphisms = getDomainIsomorphisms(id);
+  const connectedDomains = getConnectedDomains(id);
+
+  // Get recommendations for ALL slots (for interactive selector)
+  const allSlots: FunctionSlot[] = ['FND', 'HRS', 'ORT', 'FRN', 'HST', 'BRG'];
+  const allRecommendations: Record<FunctionSlot, BookRecommendation[]> = {} as Record<FunctionSlot, BookRecommendation[]>;
+  for (const slot of allSlots) {
+    allRecommendations[slot] = getBookRecommendations(id, slot);
+  }
 
   // Get related domains (same branch)
   const relatedDomains = allDomains
     .filter((d) => d.branch_id === domain.branch_id && d.domain_id !== domain.domain_id)
-    .slice(0, 6);
-
-  // Get distant domains for connections
-  const distantDomains = allDomains
-    .filter((d) => {
-      if (d.branch_id === domain.branch_id) return false;
-      const dist = distances.find(
-        dd => (dd.branch_a === domain.branch_id && dd.branch_b === d.branch_id) ||
-              (dd.branch_b === domain.branch_id && dd.branch_a === d.branch_id)
-      );
-      return dist && dist.distance >= 3;
-    })
     .slice(0, 4);
 
-  // Book recommendation prompt
-  const bookPrompt = `Recommend 5 foundational books for ${domain.name} (${branchName}) that would give a comprehensive understanding of the field. Consider both classic texts and modern syntheses. For each book, explain why it's essential.`;
+  // Get distant domains for bisociation
+  const distantDomains = allDomains
+    .filter((d) => {
+      const distance = getBranchDistance(domain.branch_id, d.branch_id);
+      return distance >= 3 && d.domain_id !== domain.domain_id;
+    })
+    .slice(0, 3);
 
   return (
-    <main className="container mx-auto px-4 py-8 max-w-3xl">
-      {/* Back link */}
-      <Link
-        href="/"
-        className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 mb-6 inline-flex items-center gap-1"
-      >
-        <span>←</span> Back to Tree
-      </Link>
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+      <main className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Back link */}
+        <Link
+          href="/"
+          className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 mb-6 inline-block"
+        >
+          ← Back to Dashboard
+        </Link>
 
-      {/* Domain Header */}
-      <div className="mb-8">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span
-                className="text-sm font-mono font-bold"
-                style={{ color: branchColor }}
-              >
-                {domain.domain_id}
-              </span>
-              {domain.is_hub && (
-                <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                  Hub
-                </Badge>
-              )}
+        {/* Domain Header */}
+        <div className="mb-8">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm text-zinc-500 font-mono">{domain.domain_id}</span>
+                {domain.is_hub && (
+                  <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                    Hub Domain
+                  </Badge>
+                )}
+                {domain.is_expert && (
+                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                    Expert Area
+                  </Badge>
+                )}
+              </div>
+              <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                {domain.name}
+              </h1>
+              <p className="text-zinc-500 mt-1">
+                {branchName}
+              </p>
             </div>
-            <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-              {domain.name}
-            </h1>
-            <p className="text-zinc-500 mt-1">{branchName}</p>
           </div>
-          <Badge
-            variant="outline"
-            className={`text-sm ${
-              domain.status === 'unread'
-                ? 'text-zinc-400 border-zinc-300'
-                : domain.status === 'reading'
-                ? 'text-blue-600 border-blue-300 bg-blue-50'
-                : 'text-green-600 border-green-300 bg-green-50'
-            }`}
-          >
-            {domain.status === 'unread' ? 'Not Read' : domain.status === 'reading' ? 'Reading' : 'Read'}
-          </Badge>
+          {domain.description && (
+            <p className="text-zinc-600 dark:text-zinc-400 mt-4 italic">
+              {domain.description}
+            </p>
+          )}
         </div>
 
-        {domain.description && (
-          <p className="text-zinc-600 dark:text-zinc-400 mt-4 italic">
-            {domain.description}
-          </p>
-        )}
+        {/* Interactive Slot Selector */}
+        <div className="mb-6">
+          <SlotSelector
+            domainId={domain.domain_id}
+            domainName={domain.name}
+            booksRead={domain.books_read}
+            defaultSlot={nextSlot}
+            recommendations={allRecommendations}
+            hasRecommendations={hasRecommendations}
+          />
+        </div>
 
-        {/* Show current book if reading */}
-        {domain.status === 'reading' && domain.book_title && (
-          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
-            <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Currently Reading</p>
-            <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              {domain.book_title}
-            </p>
-            {domain.book_author && (
-              <p className="text-zinc-600 dark:text-zinc-400">by {domain.book_author}</p>
-            )}
-          </div>
-        )}
-
-        {/* Show completed book if read */}
-        {domain.status === 'read' && domain.book_title && (
-          <div className="mt-4 p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
-            <p className="text-sm text-green-600 dark:text-green-400 font-medium">Completed</p>
-            <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              {domain.book_title}
-            </p>
-            {domain.book_author && (
-              <p className="text-zinc-600 dark:text-zinc-400">by {domain.book_author}</p>
-            )}
-            {domain.completed_at && (
-              <p className="text-xs text-zinc-500 mt-1">
-                Completed {new Date(domain.completed_at).toLocaleDateString()}
-              </p>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Add Book Form (only if not currently reading or already read) */}
-      {domain.status === 'unread' && (
-        <Card className="mb-6 border-2 border-dashed">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Add a Book to Read</CardTitle>
+        {/* Reading History */}
+        <Card className="mb-6">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Your Reading History</CardTitle>
           </CardHeader>
           <CardContent>
-            <DomainActions
-              domainId={domain.domain_id}
-              domainName={domain.name}
-              isQueued={isQueued}
-            />
+            {logs.length === 0 && books.length === 0 ? (
+              <p className="text-zinc-500 text-sm">No reading sessions logged yet.</p>
+            ) : (
+              <div className="space-y-4">
+                {logs.map((log) => {
+                  const book = books.find((b) => b.id === log.book_id);
+                  return (
+                    <div
+                      key={log.id}
+                      className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          {book ? (
+                            <div className="font-medium text-zinc-900 dark:text-zinc-100">
+                              "{book.title}"
+                              {book.author && (
+                                <span className="text-zinc-500 font-normal"> by {book.author}</span>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="font-medium text-zinc-900 dark:text-zinc-100">
+                              Reading session
+                            </div>
+                          )}
+                          <div className="text-sm text-zinc-500 mt-1">
+                            {new Date(log.log_date).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })}
+                            {log.reading_time_minutes > 0 && ` · ${log.reading_time_minutes} min`}
+                            {log.pages_read > 0 && ` · ${log.pages_read} pages`}
+                          </div>
+                        </div>
+                        {log.function_slot && (
+                          <Badge variant="outline" className="ml-2">
+                            {log.function_slot}
+                          </Badge>
+                        )}
+                      </div>
+                      {log.key_insight && (
+                        <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border-l-4 border-yellow-400">
+                          <div className="text-xs text-yellow-700 dark:text-yellow-400 font-medium mb-1">
+                            Key Insight
+                          </div>
+                          <div className="text-sm text-zinc-700 dark:text-zinc-300">
+                            {log.key_insight}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
-      )}
 
-      {/* Book Recommendation Prompt */}
-      <Card className="mb-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <span>💡</span> Need Book Ideas?
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-zinc-500 mb-3">
-            Copy this prompt and paste it into Claude or ChatGPT:
-          </p>
-          <div className="relative">
-            <pre className="p-4 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-sm whitespace-pre-wrap">
-              {bookPrompt}
-            </pre>
-            <CopyButton text={bookPrompt} />
-          </div>
-        </CardContent>
-      </Card>
+        {/* Connections Section */}
+        <Card className="mb-6">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Connections</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* Isomorphisms */}
+            {isomorphisms.length > 0 && (
+              <div className="mb-6">
+                <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">
+                  Shared Concepts (Isomorphisms)
+                </h4>
+                <div className="space-y-2">
+                  {isomorphisms.map((iso) => (
+                    <div
+                      key={iso.concept}
+                      className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg"
+                    >
+                      <div className="font-medium text-purple-800 dark:text-purple-200">
+                        {iso.concept}
+                      </div>
+                      <div className="text-sm text-purple-600 dark:text-purple-300 mt-1">
+                        Also in: {iso.domains
+                          .filter((d) => d.domain_id !== domain.domain_id)
+                          .map((d) => d.name)
+                          .join(', ')}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-      {/* Related Domains */}
-      <Card className="mb-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Related Domains</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Same branch */}
-          <div>
-            <p className="text-sm text-zinc-500 mb-2">Same Branch ({branchName})</p>
-            <div className="flex flex-wrap gap-2">
-              {relatedDomains.map((d) => (
-                <Link
-                  key={d.domain_id}
-                  href={`/domains/${d.domain_id}`}
-                  className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-                    d.status === 'read'
-                      ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
-                      : d.status === 'reading'
-                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200'
-                      : 'bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-                  }`}
-                >
-                  {d.name}
-                </Link>
-              ))}
-            </div>
-          </div>
+            {/* Connected through isomorphisms */}
+            {connectedDomains.length > 0 && (
+              <div className="mb-6">
+                <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">
+                  Connected Domains
+                </h4>
+                <div className="space-y-2">
+                  {connectedDomains.map((d) => (
+                    <Link
+                      key={d.domain_id}
+                      href={`/domains/${d.domain_id}`}
+                      className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                    >
+                      <div>
+                        <span className="text-zinc-400 text-sm mr-2">{d.domain_id}</span>
+                        <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                          {d.name}
+                        </span>
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {d.connection}
+                      </Badge>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
 
-          {/* Distant domains */}
-          {distantDomains.length > 0 && (
-            <div>
-              <p className="text-sm text-zinc-500 mb-2">Distant Domains (for Bisociation)</p>
+            {/* Same branch domains */}
+            <div className="mb-6">
+              <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">
+                Same Branch ({branchName})
+              </h4>
               <div className="flex flex-wrap gap-2">
-                {distantDomains.map((d) => (
+                {relatedDomains.map((d) => (
                   <Link
                     key={d.domain_id}
                     href={`/domains/${d.domain_id}`}
-                    className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 rounded-full text-sm hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
+                    className="px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full text-sm hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
                   >
                     {d.name}
                   </Link>
                 ))}
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
 
-      {/* Navigation */}
-      <div className="flex justify-center gap-4">
-        <Link
-          href="/"
-          className="px-6 py-2 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-        >
-          Back to Tree
-        </Link>
-        <Link
-          href="/reference"
-          className="px-6 py-2 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-        >
-          Browse All Domains
-        </Link>
-      </div>
-    </main>
+            {/* Distant domains for bisociation */}
+            <div>
+              <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">
+                Maximum Distance (for Bisociation)
+              </h4>
+              <div className="space-y-2">
+                {distantDomains.map((d) => (
+                  <Link
+                    key={d.domain_id}
+                    href={`/domains/${d.domain_id}`}
+                    className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                  >
+                    <div>
+                      <span className="text-zinc-400 text-sm mr-2">{d.domain_id}</span>
+                      <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                        {d.name}
+                      </span>
+                    </div>
+                    <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                      dist: {getBranchDistance(domain.branch_id, d.branch_id)}
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Action */}
+        <div className="flex justify-center">
+          <Link
+            href={`/log?domain=${domain.domain_id}`}
+            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-8 py-3 text-white font-medium hover:bg-blue-700 transition-colors"
+          >
+            Log Reading Session
+          </Link>
+        </div>
+      </main>
+    </div>
   );
 }

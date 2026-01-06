@@ -10,7 +10,7 @@ interface DomainActionsProps {
   isQueued: boolean;
 }
 
-export function DomainActions({ domainId, domainName: _domainName, isQueued }: DomainActionsProps) {
+export function DomainActions({ domainId, domainName, isQueued }: DomainActionsProps) {
   const router = useRouter();
   const [bookTitle, setBookTitle] = useState('');
   const [bookAuthor, setBookAuthor] = useState('');

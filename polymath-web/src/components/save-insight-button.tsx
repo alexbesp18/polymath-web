@@ -64,7 +64,7 @@ export function SaveInsightButton({
         setSaved(false);
         setContent('');
       }, 1500);
-    } catch (_err) {
+    } catch (err) {
       setError('Failed to save. Please try again.');
     } finally {
       setSaving(false);

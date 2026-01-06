@@ -5,9 +5,10 @@ import { usePathname } from 'next/navigation';
 import { CommandPalette } from '@/components/command-palette';
 
 const navItems = [
-  { href: '/', label: 'Tree' },
+  { href: '/', label: 'Today' },
+  { href: '/domains', label: 'Explore' },
   { href: '/connections', label: 'Connections' },
-  { href: '/reference', label: 'Reference' },
+  { href: '/history', label: 'History' },
 ];
 
 export function Header() {

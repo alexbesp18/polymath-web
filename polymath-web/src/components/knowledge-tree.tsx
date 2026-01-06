@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { useRouter } from 'next/navigation';
 import type { DomainWithProgress } from '@/types';
-import { BRANCH_COLORS } from '@/types';
+import { BRANCH_NAMES, BRANCH_COLORS } from '@/types';
 
 interface KnowledgeTreeProps {
   domains: DomainWithProgress[];
@@ -82,7 +82,7 @@ export function KnowledgeTree({ domains, domainsByBranch }: KnowledgeTreeProps) 
         .endAngle(endAngle - 0.02);
 
       g.append('path')
-        .attr('d', arc as unknown as string)
+        .attr('d', arc as any)
         .attr('fill', branchColor)
         .attr('opacity', 0.3);
 
