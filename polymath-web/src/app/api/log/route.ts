@@ -6,7 +6,6 @@ import {
 
 // Validation constants
 const DOMAIN_ID_PATTERN = /^\d{2}\.\d{2}$/;
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_BOOK_TITLE_LENGTH = 500;
 const MAX_AUTHOR_LENGTH = 200;
 const MAX_INSIGHT_LENGTH = 5000;
@@ -16,7 +15,7 @@ const VALID_SLOTS = ['FND', 'HRS', 'ORT', 'FRN', 'HST', 'BRG'];
 
 // Validation helper
 function validateInput(body: Record<string, unknown>): { valid: boolean; error?: string } {
-  const { domain_id, log_date, book_title, book_author, pages_read, reading_time_minutes, key_insight, function_slot } = body;
+  const { domain_id, book_title, book_author, pages_read, reading_time_minutes, key_insight, function_slot } = body;
 
   // Required fields
   if (!domain_id || typeof domain_id !== 'string') {
@@ -29,18 +28,6 @@ function validateInput(body: Record<string, unknown>): { valid: boolean; error?:
   // Domain ID format
   if (!DOMAIN_ID_PATTERN.test(domain_id)) {
     return { valid: false, error: 'domain_id must be in format XX.YY (e.g., 01.02)' };
-  }
-
-  // Date validation (optional, defaults to today)
-  if (log_date !== undefined && log_date !== null) {
-    if (typeof log_date !== 'string' || !DATE_PATTERN.test(log_date)) {
-      return { valid: false, error: 'log_date must be in format YYYY-MM-DD' };
-    }
-    // No future dates
-    const today = new Date().toISOString().split('T')[0];
-    if (log_date > today) {
-      return { valid: false, error: 'log_date cannot be in the future' };
-    }
   }
 
   // String length limits
@@ -91,12 +78,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const { domain_id, log_date, book_title, book_author, pages_read, reading_time_minutes, key_insight, function_slot } = body;
+    const { domain_id, book_title, book_author, pages_read, reading_time_minutes, key_insight, function_slot } = body;
 
     // Use atomic RPC function to prevent race conditions
     const result = await logReadingSessionAtomic({
       domain_id,
-      log_date: log_date || undefined,
       book_title,
       book_author: book_author || undefined,
       pages_read: pages_read || 0,

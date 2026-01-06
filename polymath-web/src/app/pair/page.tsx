@@ -113,18 +113,10 @@ export default async function BisociationPairing() {
               </ol>
             </div>
 
-            {/* Save Insight Button */}
-            <div className="pt-4 border-t flex items-center justify-between">
-              <p className="text-sm text-zinc-500">
-                Had an insight? Save it for later.
-              </p>
-              <SaveInsightButton
-                domainA={pairing.anchor.domain_id}
-                domainB={pairing.distant.domain_id}
-                domainAName={pairing.anchor.name}
-                domainBName={pairing.distant.name}
-                prompts={[display.mainPrompt, ...display.additionalPrompts]}
-              />
+            {/* Usage Note */}
+            <div className="text-sm text-zinc-500 pt-4 border-t">
+              Use these prompts during or after reading to force connections.
+              Capture insights in your daily log or isomorphism notes.
             </div>
           </CardContent>
         </Card>

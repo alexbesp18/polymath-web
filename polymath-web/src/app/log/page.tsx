@@ -27,34 +27,21 @@ interface LogResult {
   slot: string;
 }
 
-interface RecentBook {
-  id: string;
-  title: string;
-  author: string | null;
-  domain_id: string;
-  created_at: string;
-}
-
 function LogSessionContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
   const [domains, setDomains] = useState<Domain[]>([]);
-  const [recentBooks, setRecentBooks] = useState<RecentBook[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [logResult, setLogResult] = useState<LogResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [showOptionalFields, setShowOptionalFields] = useState(false);
 
   // Form state - pre-fill from URL params
   const [selectedDomain, setSelectedDomain] = useState(searchParams.get('domain') || '');
   const [selectedSlot, setSelectedSlot] = useState<FunctionSlot | null>(
     (searchParams.get('slot') as FunctionSlot) || null
-  );
-  const [logDate, setLogDate] = useState(
-    searchParams.get('date') || new Date().toISOString().split('T')[0]
   );
   const [bookTitle, setBookTitle] = useState(searchParams.get('book') || '');
   const [bookAuthor, setBookAuthor] = useState(searchParams.get('author') || '');
@@ -63,40 +50,21 @@ function LogSessionContent() {
   const [keyInsight, setKeyInsight] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Load domains and recent books on mount
+  // Load domains on mount
   useEffect(() => {
-    async function loadData() {
+    async function loadDomains() {
       try {
-        const [domainsRes, booksRes] = await Promise.all([
-          fetch('/api/domains'),
-          fetch('/api/books/recent'),
-        ]);
-        const domainsData = await domainsRes.json();
-        const booksData = await booksRes.json();
-        setDomains(domainsData);
-        setRecentBooks(booksData);
+        const res = await fetch('/api/domains');
+        const data = await res.json();
+        setDomains(data);
       } catch (err) {
-        console.error('Failed to load data:', err);
+        console.error('Failed to load domains:', err);
       } finally {
         setLoading(false);
       }
     }
-    loadData();
+    loadDomains();
   }, []);
-
-  // Get the most recent book for "Continue reading"
-  const lastBook = recentBooks[0];
-  const lastBookDomain = lastBook ? domains.find((d) => d.domain_id === lastBook.domain_id) : null;
-
-  // Handle "Continue reading" quick action
-  const handleContinueReading = () => {
-    if (lastBook && lastBookDomain) {
-      setSelectedDomain(lastBook.domain_id);
-      setBookTitle(lastBook.title);
-      setBookAuthor(lastBook.author || '');
-      setReadingTime('30');
-    }
-  };
 
   // Filter domains for search
   const filteredDomains = domains.filter(
@@ -132,7 +100,6 @@ function LogSessionContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           domain_id: selectedDomain,
-          log_date: logDate,
           book_title: bookTitle,
           book_author: bookAuthor,
           pages_read: parseInt(pagesRead) || 0,
@@ -242,53 +209,12 @@ function LogSessionContent() {
         ← Back
       </Link>
 
-      {/* Quick Action: Continue Reading */}
-      {lastBook && lastBookDomain && !selectedDomain && (
-        <Card className="mb-4 border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/50">
-          <CardContent className="pt-4">
-            <p className="text-sm text-zinc-500 mb-2">Quick Log</p>
-            <button
-              type="button"
-              onClick={handleContinueReading}
-              className="w-full text-left p-3 bg-white dark:bg-zinc-900 rounded-lg border hover:border-blue-500 transition-colors"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-zinc-900 dark:text-zinc-100">
-                    Continue "{lastBook.title}"
-                  </p>
-                  <p className="text-sm text-zinc-500">
-                    {lastBookDomain.name} · +30 min
-                  </p>
-                </div>
-                <span className="text-blue-600 text-sm font-medium">→</span>
-              </div>
-            </button>
-          </CardContent>
-        </Card>
-      )}
-
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Log Reading Session</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Date Selection */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Date</label>
-              <Input
-                type="date"
-                value={logDate}
-                max={new Date().toISOString().split('T')[0]}
-                onChange={(e) => setLogDate(e.target.value)}
-                className="w-full"
-              />
-              <p className="text-xs text-zinc-500 mt-1">
-                Default: today. Select a past date to backfill.
-              </p>
-            </div>
-
             {/* Domain Selection */}
             <div>
               <label className="block text-sm font-medium mb-2">Domain</label>
@@ -399,24 +325,9 @@ function LogSessionContent() {
                 <Input
                   placeholder="Enter book title..."
                   value={bookTitle}
-                  onChange={(e) => {
-                    setBookTitle(e.target.value);
-                    // Auto-fill author if selecting from recent books
-                    const matchedBook = recentBooks.find(
-                      (b) => b.title.toLowerCase() === e.target.value.toLowerCase()
-                    );
-                    if (matchedBook && matchedBook.author) {
-                      setBookAuthor(matchedBook.author);
-                    }
-                  }}
-                  list="recent-books"
+                  onChange={(e) => setBookTitle(e.target.value)}
                   required
                 />
-                <datalist id="recent-books">
-                  {recentBooks.map((b) => (
-                    <option key={b.id} value={b.title} />
-                  ))}
-                </datalist>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Author (optional)</label>
@@ -424,13 +335,7 @@ function LogSessionContent() {
                   placeholder="Author name..."
                   value={bookAuthor}
                   onChange={(e) => setBookAuthor(e.target.value)}
-                  list="recent-authors"
                 />
-                <datalist id="recent-authors">
-                  {[...new Set(recentBooks.map((b) => b.author).filter(Boolean))].map((author) => (
-                    <option key={author} value={author!} />
-                  ))}
-                </datalist>
               </div>
             </div>
 
@@ -478,48 +383,32 @@ function LogSessionContent() {
               </div>
             </div>
 
-            {/* Optional fields (collapsible) */}
+            {/* Pages (optional) */}
             <div>
-              <button
-                type="button"
-                onClick={() => setShowOptionalFields(!showOptionalFields)}
-                className="flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
-              >
-                <span className={`transform transition-transform ${showOptionalFields ? 'rotate-90' : ''}`}>
-                  ▶
-                </span>
-                {showOptionalFields ? 'Hide optional fields' : 'Add pages, insights...'}
-              </button>
+              <label className="block text-sm font-medium mb-2">Pages Read (optional)</label>
+              <Input
+                type="number"
+                placeholder="0"
+                value={pagesRead}
+                onChange={(e) => setPagesRead(e.target.value)}
+              />
+            </div>
 
-              {showOptionalFields && (
-                <div className="mt-4 space-y-4 pl-4 border-l-2 border-zinc-200 dark:border-zinc-700">
-                  {/* Pages (optional) */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Pages Read</label>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={pagesRead}
-                      onChange={(e) => setPagesRead(e.target.value)}
-                    />
-                  </div>
-
-                  {/* Key Insight */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Key Insight</label>
-                    <p className="text-sm text-zinc-500 mb-2">
-                      What's the one thing you want to remember?
-                    </p>
-                    <textarea
-                      className="w-full p-3 border rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      rows={3}
-                      placeholder="The key insight from today's reading..."
-                      value={keyInsight}
-                      onChange={(e) => setKeyInsight(e.target.value)}
-                    />
-                  </div>
-                </div>
-              )}
+            {/* Key Insight */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Key Insight <span className="text-zinc-400 font-normal">(optional)</span>
+              </label>
+              <p className="text-sm text-zinc-500 mb-2">
+                What's the one thing you want to remember?
+              </p>
+              <textarea
+                className="w-full p-3 border rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows={3}
+                placeholder="The key insight from today's reading..."
+                value={keyInsight}
+                onChange={(e) => setKeyInsight(e.target.value)}
+              />
             </div>
 
             {/* Error */}

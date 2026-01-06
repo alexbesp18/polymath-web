@@ -23,40 +23,12 @@ export default async function DomainBrowser() {
     a.localeCompare(b)
   );
 
-  // Overall stats
-  const totalDomains = domains.length;
-  const touchedDomains = domains.filter((d) => d.status !== 'untouched').length;
-  const totalBooks = domains.reduce((sum, d) => sum + d.books_read, 0);
-  const expertDomains = domains.filter((d) => d.books_read >= 6).length;
-
   return (
     <main className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-2">Domain Browser</h1>
-        <p className="text-zinc-500 mb-4">
+        <p className="text-zinc-500 mb-6">
           {domains.length} domains across {sortedBranches.length} branches
         </p>
-
-        {/* Overall Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 border">
-            <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{touchedDomains}</p>
-            <p className="text-sm text-zinc-500">Domains touched</p>
-          </div>
-          <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 border">
-            <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{totalBooks}</p>
-            <p className="text-sm text-zinc-500">Books read</p>
-          </div>
-          <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 border">
-            <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{expertDomains}</p>
-            <p className="text-sm text-zinc-500">Domains complete</p>
-          </div>
-          <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 border">
-            <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-              {Math.round((touchedDomains / totalDomains) * 100)}%
-            </p>
-            <p className="text-sm text-zinc-500">Coverage</p>
-          </div>
-        </div>
 
         {/* Branch Sections */}
         <div className="space-y-8">
@@ -113,19 +85,6 @@ export default async function DomainBrowser() {
                               )}
                             </div>
                           </div>
-                          {/* Mini 6-slot progress bar */}
-                          <div className="flex gap-0.5 mt-2">
-                            {[0, 1, 2, 3, 4, 5].map((slot) => (
-                              <div
-                                key={slot}
-                                className={`h-1.5 flex-1 rounded-sm ${
-                                  slot < domain.books_read
-                                    ? 'bg-green-500'
-                                    : 'bg-zinc-200 dark:bg-zinc-700'
-                                }`}
-                              />
-                            ))}
-                          </div>
                           <div className="flex items-center justify-between mt-2">
                             <Badge
                               variant="outline"
@@ -144,7 +103,7 @@ export default async function DomainBrowser() {
                               {domain.status}
                             </Badge>
                             <span className="text-xs text-zinc-500">
-                              {domain.books_read}/6
+                              {domain.books_read} books
                             </span>
                           </div>
                         </CardContent>

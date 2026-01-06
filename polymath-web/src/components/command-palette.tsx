@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   CommandDialog,
@@ -19,50 +19,13 @@ interface Domain {
   status: string;
 }
 
-const branchNames: Record<string, string> = {
-  '01': 'Physical Sciences',
-  '02': 'Life Sciences',
-  '03': 'Formal Sciences',
-  '04': 'Earth & Space',
-  '05': 'Engineering',
-  '06': 'Medicine',
-  '07': 'Social Sciences',
-  '08': 'Business',
-  '09': 'Psychology',
-  '10': 'Philosophy',
-  '11': 'Arts',
-  '12': 'Literature',
-  '13': 'History',
-  '14': 'Law & Politics',
-  '15': 'Religion',
-};
+interface CommandPaletteProps {
+  domains: Domain[];
+}
 
-export function CommandPalette() {
+export function CommandPalette({ domains }: CommandPaletteProps) {
   const [open, setOpen] = useState(false);
-  const [domains, setDomains] = useState<Domain[]>([]);
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
-
-  // Fetch domains when dialog opens
-  const fetchDomains = useCallback(async () => {
-    if (domains.length > 0) return; // Already loaded
-    setLoading(true);
-    try {
-      const res = await fetch('/api/domains');
-      const data = await res.json();
-      setDomains(data);
-    } catch (err) {
-      console.error('Failed to load domains:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [domains.length]);
-
-  useEffect(() => {
-    if (open) {
-      fetchDomains();
-    }
-  }, [open, fetchDomains]);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -91,72 +54,71 @@ export function CommandPalette() {
     return acc;
   }, {} as Record<string, Domain[]>);
 
+  const branchNames: Record<string, string> = {
+    '01': 'Physical Sciences',
+    '02': 'Life Sciences',
+    '03': 'Formal Sciences',
+    '04': 'Earth & Space',
+    '05': 'Engineering',
+    '06': 'Medicine',
+    '07': 'Social Sciences',
+    '08': 'Business',
+    '09': 'Psychology',
+    '10': 'Philosophy',
+    '11': 'Arts',
+    '12': 'Literature',
+    '13': 'History',
+    '14': 'Law & Politics',
+    '15': 'Religion',
+  };
+
   return (
     <>
-      {/* Keyboard shortcut trigger button */}
+      {/* Keyboard shortcut hint */}
       <button
         onClick={() => setOpen(true)}
-        className="hidden md:flex items-center gap-2 px-3 py-1.5 text-sm text-zinc-500 border rounded-lg hover:border-zinc-400 dark:hover:border-zinc-500 transition-colors"
+        className="hidden md:flex items-center gap-2 px-3 py-1.5 text-sm text-zinc-500 border rounded-lg hover:border-zinc-400 transition-colors"
       >
-        <span>Search...</span>
+        <span>Search domains...</span>
         <kbd className="px-1.5 py-0.5 text-xs bg-zinc-100 dark:bg-zinc-800 rounded">⌘K</kbd>
-      </button>
-
-      {/* Mobile trigger */}
-      <button
-        onClick={() => setOpen(true)}
-        className="md:hidden p-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
-        aria-label="Search"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-        </svg>
       </button>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Search domains by name or ID..." />
         <CommandList>
-          {loading ? (
-            <div className="p-4 text-center text-zinc-500">Loading...</div>
-          ) : (
-            <>
-              <CommandEmpty>No domains found.</CommandEmpty>
+          <CommandEmpty>No domains found.</CommandEmpty>
 
-              {/* Quick actions */}
-              <CommandGroup heading="Quick Actions">
-                <CommandItem onSelect={() => { setOpen(false); router.push('/log'); }}>
-                  📝 Log Reading Session
-                </CommandItem>
-                <CommandItem onSelect={() => { setOpen(false); router.push('/pair'); }}>
-                  🔀 Generate Bisociation Pair
-                </CommandItem>
-                <CommandItem onSelect={() => { setOpen(false); router.push('/next'); }}>
-                  ➡️ Next Recommended Domain
-                </CommandItem>
-              </CommandGroup>
+          {/* Quick actions */}
+          <CommandGroup heading="Quick Actions">
+            <CommandItem onSelect={() => { setOpen(false); router.push('/log'); }}>
+              📝 Log Reading Session
+            </CommandItem>
+            <CommandItem onSelect={() => { setOpen(false); router.push('/pair'); }}>
+              🔀 Generate Bisociation Pair
+            </CommandItem>
+            <CommandItem onSelect={() => { setOpen(false); router.push('/next'); }}>
+              ➡️ Next Recommended Domain
+            </CommandItem>
+          </CommandGroup>
 
-              {/* Domains by branch */}
-              {Object.entries(branchGroups)
-                .sort(([a], [b]) => a.localeCompare(b))
-                .map(([branchId, branchDomains]) => (
-                <CommandGroup key={branchId} heading={branchNames[branchId] || branchId}>
-                  {branchDomains.map((domain) => (
-                    <CommandItem
-                      key={domain.domain_id}
-                      value={`${domain.domain_id} ${domain.name} ${branchNames[domain.branch_id]}`}
-                      onSelect={() => handleSelect(domain.domain_id)}
-                    >
-                      <span className="text-zinc-400 w-12">{domain.domain_id}</span>
-                      <span className="flex-1">{domain.name}</span>
-                      <span className="text-xs text-zinc-500">
-                        {domain.books_read}/6
-                      </span>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
+          {/* Domains by branch */}
+          {Object.entries(branchGroups).map(([branchId, branchDomains]) => (
+            <CommandGroup key={branchId} heading={branchNames[branchId] || branchId}>
+              {branchDomains.map((domain) => (
+                <CommandItem
+                  key={domain.domain_id}
+                  value={`${domain.domain_id} ${domain.name}`}
+                  onSelect={() => handleSelect(domain.domain_id)}
+                >
+                  <span className="text-zinc-400 w-12">{domain.domain_id}</span>
+                  <span className="flex-1">{domain.name}</span>
+                  <span className="text-xs text-zinc-500">
+                    {domain.books_read}/6
+                  </span>
+                </CommandItem>
               ))}
-            </>
-          )}
+            </CommandGroup>
+          ))}
         </CommandList>
       </CommandDialog>
     </>

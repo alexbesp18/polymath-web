@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CommandPalette } from '@/components/command-palette';
 
 const navItems = [
   { href: '/', label: 'Today' },
@@ -21,12 +20,6 @@ export function Header() {
           <Link href="/" className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
             Polymath
           </Link>
-
-          {/* Center: Search */}
-          <div className="flex-1 flex justify-center px-4">
-            <CommandPalette />
-          </div>
-
           <nav className="flex gap-1">
             {navItems.map((item) => {
               const isActive = pathname === item.href ||
